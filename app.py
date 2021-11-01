@@ -53,6 +53,9 @@ def main():
         fps = 1/np.round(end_time - start_time, 3)
         print(f"Frame Per Second: {fps}")
         results_array = results.pandas().xyxy[0].to_json(orient="records")      #결과값 json변환
+        for result in results_array:
+            print(result.name, end=" ")
+        print("\nresults array")
         print(results_array)
 
 
