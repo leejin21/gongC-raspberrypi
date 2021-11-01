@@ -17,6 +17,19 @@ def convert(size, box):
     h = h*dh
     return (x,y,w,h)
 
+def test():
+    # Model
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+
+    # Image
+    img = 'https://ultralytics.com/images/zidane.jpg'
+
+    # Inference
+    results = model(img)
+
+    print(results.pandas().xyxy[0])
+
+
 def main():
     global model
     '''
@@ -36,17 +49,8 @@ def main():
 
 if __name__== "__main__":
     # 해당 파일 실행 시 실행
-    # Model
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
 
-    # Image
-    img = 'https://ultralytics.com/images/zidane.jpg'
-
-    # Inference
-    results = model(img)
-
-    print(results.pandas().xyxy[0])
-    # model = torch.hub.load('yolov5', 'custom', path='/gongC-raspberrypi/weights/best.pt', source='local', force_reload=True)
+    model = torch.hub.load('yolov5', 'custom', path='gongC-raspberrypi/weights/best.pt', source='local', force_reload=True)
     
     # main()
     pass
