@@ -40,11 +40,19 @@ def main():
     2. 60초마다 축적한 12개의 집중 여부 -> 서버로 전송
     3. (확장) 전광판 사용하기
     '''
-    stream = cv2.VideoCapture(0)
+    player = cv2.VideoCapture(0)
+    assert player.isOpened()
     # 0 means read from local camera
-    results = model(stream)
-    results.print()
-    pass
+    while True:
+        start_time = time()
+        ret, frame = player.read()
+        assert ret
+        results = model(frame)
+        end_time = time()
+        fps = 1/np.round(end_time - start_time, 3)
+        print(f"Frame Per Second: {fps}")
+        results_array = results.pandas().xyxy[0].to_json(orient="records")      #결과값 json변환
+        print(results_array)
 
 
 if __name__== "__main__":
