@@ -50,7 +50,7 @@ def main():
 if __name__== "__main__":
     # 해당 파일 실행 시 실행
 
-    model = torch.hub.load('gongC-raspberrypi/yolov5', 'custom', path='gongC-raspberrypi/weights/best.pt', source='local', force_reload=True)
+    model = torch.hub.load('yolov5', 'custom', path='weights/best.pt', source='local', force_reload=True)
     
     # main()
     pass
