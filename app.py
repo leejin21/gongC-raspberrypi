@@ -45,7 +45,7 @@ if __name__== "__main__":
     # Inference
     results = model(img)
 
-    results.pandas().xyxy[0]
+    print(results.pandas().xyxy[0])
     # model = torch.hub.load('yolov5', 'custom', path='/gongC-raspberrypi/weights/best.pt', source='local', force_reload=True)
     
     # main()
