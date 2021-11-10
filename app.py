@@ -1,4 +1,4 @@
-import requests
+import requests, json
 import torch
 import numpy as np
 import cv2
@@ -41,6 +41,17 @@ def getResultArray(results):
     results_array = json.loads(results_array)       # string을 json(dict)형식으로 변환
     return results_array
 
+def postDataBy1Min(data):
+    URL = 'http://www.tistory.com'
+    headers = {'Content-Type': 'application/json; charset=utf-8'}
+    cookies = {'session_id': 'sorryidontcare'}
+    # res = requests.post(URL, data, headers=headers, cookies=cookies)
+    print("="*70)
+    print("POST /concent/data 성공")
+    print("="*70)
+    ## TODO 성공/실패 각각 대응 코드 작성
+    # return res
+    
 def main():
     global model
     '''
@@ -55,21 +66,32 @@ def main():
     assert player.isOpened()
     # 0 means read from local camera
     current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
+    study_data = {"C": 0, "P":0}
+
     while True:
         prev_minute = current_time["minute"]
+
         start_time = time.time()
         ret, frame = player.read()
         assert ret
         results = model(frame)
         end_time = time.time()
+
         fps = 1/np.round(end_time - start_time, 3)
-        current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
         
-        if (prev_minute != current_time["minute"]):
-            print("분이 바뀌었소")
+        # 분이 바뀔 때마다 서버에 POST 요청
+        current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
+        if (prev_minute != current_time["minute"]):    
+            postDataBy1Min(study_data)
+        
+        # results -> results_array(요소 각각이 딕셔너리인 배열)로 변환
+        results_array = getResultArray(results)
+        # 공부 여부 판별 알고리즘 적용해 study_data에 축적
+        ## TODO 알고리즘 코드 작성
+
+        # 로그 찍기
         print("===============================")
         print(f"Frame Per Second: {fps}")
-        results_array = getResultArray(results)
         print("Current Time: "+str(current_time["hour"])+":"+str(current_time["minute"])+":"+str(time.localtime().tm_sec))
         for result in results_array:
             print(result["name"], end=" ")
