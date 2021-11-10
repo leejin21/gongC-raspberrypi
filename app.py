@@ -62,8 +62,8 @@ def main():
         '''
         for result in results_array:
             # Attribute Error 'str' object has no attr 'name'
-            print(result.name, end=" ")
-            print(result.confidence, end = " ")
+            print(result["name"], end=" ")
+            print(result["confidence"], end = " ")
             print("")
         print(results_array)
 
