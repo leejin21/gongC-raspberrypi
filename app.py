@@ -64,7 +64,7 @@ def main():
         print("===============================")
         print(f"Frame Per Second: {fps}")
         results_array = getResultArray(results)
-        print("Current Time:", time.localtime().tm_hour, time.localtime().tm_min, time.localtime().tm_sec)
+        print("Current Time: "+str(time.localtime().tm_hour)+":"+str(time.localtime().tm_min, time.localtime().tm_sec))
         for result in results_array:
             print(result["name"], end=" ")
             print(round(result["confidence"], 3), end=" ")
