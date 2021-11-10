@@ -51,17 +51,21 @@ def main():
         results = model(frame)
         end_time = time()
         fps = 1/np.round(end_time - start_time, 3)
+        print("===============================")
         print(f"Frame Per Second: {fps}")
-        results_array = results.pandas().xyxy[0].to_json(orient="records")      #결과값 json변환
-        results_array = results_array.replace("'","\"")     #'을 "로 치환해야 json으로 변환 가능함
-        results_array = json.loads(results_array)       #string을 json(dict)형식으로 변환
+        results_array = results.pandas().xyxy[0].to_json(orient="records")      # 결과값 json변환
+        results_array = results_array.replace("'","\"")     # '을 "로 치환해야 json으로 변환 가능함
+        results_array = json.loads(results_array)       # string을 json(dict)형식으로 변환
+        '''
+        results_array 형태
+        [{'xmin': 226.7082824707, 'ymin': 210.1504211426, 'xmax': 561.6719970703, 'ymax': 480.0, 'confidence': 0.5927491188, 'class': 0, 'name': 'handonly'}, {'xmin': 300.7040100098, 'ymin': 30.6222915649, 'xmax': 479.7358703613, 'ymax': 270.3709106445, 'confidence': 0.2770100236, 'class': 9, 'name': 'phone'}]
+        '''
+        for result in results_array:
+            # Attribute Error 'str' object has no attr 'name'
+            print(result.name, end=" ")
+            print(result.confidence, end = " ")
+            print("")
         print(results_array)
-        # for result in results_array:
-        #     # Attribute Error 'str' object has no attr 'name'
-        #     print(result.name, end=" ")
-        # print("\nresults array")
-        # print(results_array)
-
 
 if __name__== "__main__":
     # 해당 파일 실행 시 실행
