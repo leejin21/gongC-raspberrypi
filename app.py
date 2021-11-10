@@ -53,10 +53,14 @@ def main():
         fps = 1/np.round(end_time - start_time, 3)
         print(f"Frame Per Second: {fps}")
         results_array = results.pandas().xyxy[0].to_json(orient="records")      #결과값 json변환
-        for result in results_array:
-            print(result.name, end=" ")
-        print("\nresults array")
+        results_array = results_array.replace("'","\"")     #'을 "로 치환해야 json으로 변환 가능함
+        results_array = json.loads(results_array)       #string을 json(dict)형식으로 변환
         print(results_array)
+        # for result in results_array:
+        #     # Attribute Error 'str' object has no attr 'name'
+        #     print(result.name, end=" ")
+        # print("\nresults array")
+        # print(results_array)
 
 
 if __name__== "__main__":
