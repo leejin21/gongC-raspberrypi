@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import cv2
 import json
-from time import time
+import time
 
 def convert(size, box):
     dw = 1./size[0]
@@ -55,15 +55,16 @@ def main():
     assert player.isOpened()
     # 0 means read from local camera
     while True:
-        start_time = time()
+        start_time = time.time()
         ret, frame = player.read()
         assert ret
         results = model(frame)
-        end_time = time()
+        end_time = time.time()
         fps = 1/np.round(end_time - start_time, 3)
         print("===============================")
         print(f"Frame Per Second: {fps}")
         results_array = getResultArray(results)
+        print("Current Time:", time.localtime().tm_hour, time.localtime().tm_min, time.localtime().tm_sec)
         for result in results_array:
             print(result["name"], end=" ")
             print(round(result["confidence"], 3), end=" ")
