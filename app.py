@@ -46,9 +46,9 @@ def postDataBy1Min(data):
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     cookies = {'session_id': 'sorryidontcare'}
     # res = requests.post(URL, data, headers=headers, cookies=cookies)
-    print("="*70)
+    print("*"*50)
     print("POST /concent/data 성공")
-    print("="*70)
+    print("*"*50)
     ## TODO 성공/실패 각각 대응 코드 작성
     # return res
     
