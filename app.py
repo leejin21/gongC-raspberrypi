@@ -54,17 +54,23 @@ def main():
     player = cv2.VideoCapture(0)
     assert player.isOpened()
     # 0 means read from local camera
+    current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
     while True:
+        prev_minute = current_time["minute"]
         start_time = time.time()
         ret, frame = player.read()
         assert ret
         results = model(frame)
         end_time = time.time()
         fps = 1/np.round(end_time - start_time, 3)
+        current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
+        
+        if (prev_minute != current_time["minute"]):
+            print("분이 바뀌었소")
         print("===============================")
         print(f"Frame Per Second: {fps}")
         results_array = getResultArray(results)
-        print("Current Time: "+str(time.localtime().tm_hour)+":"+str(time.localtime().tm_min)+":"+str(time.localtime().tm_sec))
+        print("Current Time: "+str(current_time["hour"])+":"+str(current_time["minute"])+":"+str(time.localtime().tm_sec))
         for result in results_array:
             print(result["name"], end=" ")
             print(round(result["confidence"], 3), end=" ")
