@@ -1,4 +1,5 @@
 import requests, json
+from requests.api import post
 import torch
 import numpy as np
 import cv2
@@ -42,15 +43,52 @@ def getResultArray(results):
     return results_array
 
 def postDataBy1Min(data):
-    URL = 'http://www.tistory.com'
-    headers = {'Content-Type': 'application/json; charset=utf-8'}
+    URL = 'http://localhost:5000/concent/data'
+    headers = {'Content-Type': 'application/json; charset=utf-8', 'x-access-token':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiaWF0IjoxNjM3NjU4NjY0LCJleHAiOjUyMzc2NTUwNjR9.E2MQKePtt5A21XvVsrYi2kPxbc-M25b6m7dS-NErfsk'}
     cookies = {'session_id': 'sorryidontcare'}
-    # res = requests.post(URL, data, headers=headers, cookies=cookies)
+    res = requests.post(URL, data, headers=headers, cookies=cookies)
     print("*"*50)
-    print("POST /concent/data 성공")
-    print("*"*50)
-    ## TODO 성공/실패 각각 대응 코드 작성
-    # return res
+    if res.status_code == 200:
+        # 성공 시
+        print("POST /concent/data 성공")
+        print("*"*50)
+        return True
+    else:
+        print("POST /concent/data 실패")
+        print("*"*50)
+        return False
+
+def isConcentOrPlay(data):
+    '''
+    [OUTPUT]: 'C' or 'P'
+    1. C인 경우
+        손, 책이 둘 다 검출되는 경우
+        손, 태블릿이 둘 다 검출되는 경우
+        손, 펜이 둘 다 검출되는 경우 
+    2. P인 경우
+        핸드폰인 경우
+        C가 아닌 경우
+    '''
+    isHandExist = False
+    isBookExist = False
+    isPenExist = False
+    
+    for d in data:
+        if d['name'] == 'handonly':
+            isHandExist = True
+        if d['name'] == 'book' or d['name'] == 'tablet':
+            isBookExist = True
+        if d['name'] == 'pen':
+            isPenExist = True
+        if d['name'] == 'phone':
+            return 'P'
+
+    if isHandExist and isBookExist:
+        return 'C'
+    elif isHandExist and isPenExist:
+        return 'C'
+    return 'P'
+        
     
 def main():
     global model
@@ -79,15 +117,24 @@ def main():
 
         fps = 1/np.round(end_time - start_time, 3)
         
-        # 분이 바뀔 때마다 서버에 POST 요청
+        # 분이 바뀔 때마다
         current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
-        if (prev_minute != current_time["minute"]):    
-            postDataBy1Min(study_data)
-        
+        if (prev_minute != current_time["minute"]):
+            if study_data["C"] > study_data["P"]:
+                # 1분간 집중한 경우로 취급
+                body = {"status": "C"}
+            else:
+                # 1분간 논 경우로 취급
+                body = {"status": "P"}
+            # 서버에 POST 요청
+            if postDataBy1Min(body):
+                # 성공적으로 post 한 경우 클리어해 주기
+                study_data = {"C": 0, "P":0}
+            
         # results -> results_array(요소 각각이 딕셔너리인 배열)로 변환
         results_array = getResultArray(results)
-        # 공부 여부 판별 알고리즘 적용해 study_data에 축적
-        ## TODO 알고리즘 코드 작성
+        # 공부 여부 판별 알고리즘 적용해 study_data에 C, P 개수 갱신 및 축적
+        study_data[isConcentOrPlay(results_array)] += 1
 
         # 로그 찍기
         print("===============================")
@@ -105,5 +152,5 @@ if __name__== "__main__":
 
     model = torch.hub.load('yolov5', 'custom', path='weights/best.pt', source='local', force_reload=True)
     
-    main()
-    pass
+    # main()
+    postDataBy1Min({})
