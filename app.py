@@ -152,5 +152,5 @@ if __name__== "__main__":
 
     model = torch.hub.load('yolov5', 'custom', path='weights/best.pt', source='local', force_reload=True)
     
-    # main()
-    postDataBy1Min({})
+    main()
+    # postDataBy1Min({})
