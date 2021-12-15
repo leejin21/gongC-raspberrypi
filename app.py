@@ -44,7 +44,8 @@ def getResultArray(results):
     return results_array
 
 def postDataBy1Min(data):
-    URL = getServerIP()+'/concent/data'
+    # URL = getServerIP()+'/concent/data'
+    URL = getServerIP()
     print(URL)
     headers = {'Content-Type': 'application/json; charset=utf-8', 'x-access-token':getTestToken()}
     # cookies = {'session_id': 'sorryidontcare'}
