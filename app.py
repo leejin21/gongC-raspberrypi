@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 import json
 import time
-from secret import getServerIP
+from secret import getServerIP, getTestToken
 
 def convert(size, box):
     dw = 1./size[0]
@@ -45,9 +45,11 @@ def getResultArray(results):
 
 def postDataBy1Min(data):
     URL = getServerIP()+'/concent/data'
-    headers = {'Content-Type': 'application/json; charset=utf-8', 'x-access-token':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiaWF0IjoxNjM3NjU4NjY0LCJleHAiOjUyMzc2NTUwNjR9.E2MQKePtt5A21XvVsrYi2kPxbc-M25b6m7dS-NErfsk'}
-    cookies = {'session_id': 'sorryidontcare'}
-    res = requests.post(URL, data, headers=headers, cookies=cookies)
+    print(URL)
+    headers = {'Content-Type': 'application/json; charset=utf-8', 'x-access-token':getTestToken()}
+    # cookies = {'session_id': 'sorryidontcare'}
+    # res = requests.post(URL, data, headers=headers, cookies=cookies)
+    res = requests.post(URL, data, headers=headers)
     print("*"*50)
     if res.status_code == 200:
         # 성공 시
