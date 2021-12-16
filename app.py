@@ -148,11 +148,11 @@ def main():
             print("===POST 성공===")
             print("축적 데이터:", study_data)
             print("결과:", body)
-            # # 서버에 POST 요청
-            # if postDataBy1Min(body):
-            #     # 성공적으로 post 한 경우 클리어해 주기
-            #     study_data = {"C": 0, "P":0}
-            study_data = {"C": 0, "P":0}
+            # 서버에 POST 요청
+            if postDataBy1Min(body):
+                # 성공적으로 post 한 경우 클리어해 주기
+                study_data = {"C": 0, "P":0}
+            # study_data = {"C": 0, "P":0}
             
         # results -> results_array(요소 각각이 딕셔너리인 배열)로 변환
         results_array = getResultArray(results)
@@ -181,6 +181,6 @@ if __name__== "__main__":
 
     model = torch.hub.load('yolov5', 'custom', path='weights/best.pt', source='local', force_reload=True)
     
-    # main()
-    getTestFromServer()
-    postDataBy1Min({"status": "C"})
+    main()
+    # getTestFromServer()
+    # postDataBy1Min({"status": "C"})
