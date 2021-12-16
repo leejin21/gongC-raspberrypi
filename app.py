@@ -6,6 +6,7 @@ import cv2
 import json
 import time
 from secret import getServerIP, getTestToken
+from manageLED import makeRedLEDOn, makeGreenLEDOn
 
 def convert(size, box):
     dw = 1./size[0]
@@ -130,15 +131,25 @@ def main():
             else:
                 # 1분간 논 경우로 취급
                 body = {"status": "P"}
-            # 서버에 POST 요청
-            if postDataBy1Min(body):
-                # 성공적으로 post 한 경우 클리어해 주기
-                study_data = {"C": 0, "P":0}
+            print("===POST 성공===")
+            print("축적 데이터:", study_data)
+            print("결과:", body)
+            # # 서버에 POST 요청
+            # if postDataBy1Min(body):
+            #     # 성공적으로 post 한 경우 클리어해 주기
+            #     study_data = {"C": 0, "P":0}
+            study_data = {"C": 0, "P":0}
             
         # results -> results_array(요소 각각이 딕셔너리인 배열)로 변환
         results_array = getResultArray(results)
         # 공부 여부 판별 알고리즘 적용해 study_data에 C, P 개수 갱신 및 축적
-        study_data[isConcentOrPlay(results_array)] += 1
+        algorithmResult = isConcentOrPlay(results_array)
+        study_data[algorithmResult] += 1
+        # 공부여부에 따라 LED 색깔 변화
+        if algorithmResult == 'C':
+            makeGreenLEDOn()
+        else:
+            makeRedLEDOn()
 
         # 로그 찍기
         print("===============================")
