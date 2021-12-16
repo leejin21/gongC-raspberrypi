@@ -62,10 +62,10 @@ def postDataBy1Min(data):
     URL = getServerIP()+'/concent/data'
     # URL = getServerIP()+'/'
     print(URL)
-    headers = {'Content-Type': 'application/json; charset=utf-8', 'x-access-token':getTestToken()}
+    headers = {'Content-Type': 'application/json;charset=utf-8', 'x-access-token':getTestToken()}
     # cookies = {'session_id': 'sorryidontcare'}
     # res = requests.post(URL, data, headers=headers, cookies=cookies)
-    res = requests.post(URL, data, headers=headers)
+    res = requests.post(URL, json=data, headers=headers)
     print("*"*50)
     if res.status_code == 200:
         # 성공 시
@@ -182,5 +182,5 @@ if __name__== "__main__":
     model = torch.hub.load('yolov5', 'custom', path='weights/best.pt', source='local', force_reload=True)
     
     # main()
-    # getTestFromServer()
+    getTestFromServer()
     postDataBy1Min({"status": "C"})

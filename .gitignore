@@ -2,3 +2,4 @@ weights/*
 yolov5/*
 secret.py
 __pycache__/*
+testAPI.py
