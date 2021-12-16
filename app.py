@@ -1,3 +1,4 @@
+
 import requests, json
 from requests.api import post
 import torch
@@ -43,6 +44,19 @@ def getResultArray(results):
     results_array = results_array.replace("'","\"")     # '을 "로 치환해야 json으로 변환 가능함
     results_array = json.loads(results_array)       # string을 json(dict)형식으로 변환
     return results_array
+
+def getTestFromServer():
+    URL = getServerIP()+'/'
+    headers = {'Content-Type': 'application/json; charset=utf-8', 'x-access-token':getTestToken()}
+    res = requests.get(URL, headers=headers)
+    print("*"*50)
+    if res.status_code == 200:
+        # 성공 시
+        print("GET 테스트 성공")
+        print("*"*50)
+    else:
+        print("GET 테스트 실패")
+        print("*"*50)
 
 def postDataBy1Min(data):
     # URL = getServerIP()+'/concent/data'
@@ -167,5 +181,6 @@ if __name__== "__main__":
 
     model = torch.hub.load('yolov5', 'custom', path='weights/best.pt', source='local', force_reload=True)
     
-    main()
-    # postDataBy1Min({})
+    # main()
+    # getTestFromServer()
+    postDataBy1Min({"status": "C"})

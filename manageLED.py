@@ -11,4 +11,3 @@ def makeRedLEDOn():
 def makeGreenLEDOn():
     red_led.off()
     green_led.on()
-
