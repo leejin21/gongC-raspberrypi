@@ -81,17 +81,20 @@ def isConcentOrPlay(data):
     '''
     [OUTPUT]: 'C' or 'P' or 'N'
     1. C인 경우
-        손, 책이 둘 다 검출되는 경우
-        손, 태블릿이 둘 다 검출되는 경우
-        손, 펜이 둘 다 검출되는 경우
+        펜, 책, 태블릿이 검출되는 경우 (OR)
     2. P인 경우
         핸드폰이 검출되는 경우
+        어떤 객체도 검출되지 않는 경우
     3. N인 경우
         위 1, 2번 케이스 어디에도 해당되지 않는 경우
     '''
-    isHandExist = False
+    # isHandExist = False
     isBookExist = False
     isPenExist = False
+
+    if len(d) == 0:
+        # 어떤 객체도 검출되지 않음
+        return 'P'
     
     for d in data:
         if d['name'] == 'handonly':
@@ -102,11 +105,9 @@ def isConcentOrPlay(data):
             isPenExist = True
         if d['name'] == 'phone':
             return 'P'
-
-    if isHandExist and isBookExist:
+    if isPenExist or isBookExist:
         return 'C'
-    elif isHandExist and isPenExist:
-        return 'C'
+    
     return 'N'
         
     
@@ -143,7 +144,7 @@ def main():
         # 분이 바뀔 때마다
         current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
         if (prev_minute != current_time["minute"]):
-            if study_data["N"] > (study_data["P"] + study_data["C"]):
+            if study_data["N"] > (study_data["P"] + study_data["C"]) and study_data["P"]>2*study_data["C"]:
                 # 검출 객체들이 안 나오는 경우가 P, C보다 많은 경우 1분간 논 경우로 취급
                 body = {"status": "P"}
             elif study_data["C"] > study_data["P"]:
