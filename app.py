@@ -92,7 +92,7 @@ def isConcentOrPlay(data):
     isBookExist = False
     isPenExist = False
 
-    if len(d) == 0:
+    if len(data) == 0:
         # 어떤 객체도 검출되지 않음
         return 'P'
     
