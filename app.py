@@ -1,3 +1,4 @@
+
 import requests, json
 from requests.api import post
 import torch
@@ -44,14 +45,27 @@ def getResultArray(results):
     results_array = json.loads(results_array)       # string을 json(dict)형식으로 변환
     return results_array
 
-def postDataBy1Min(data):
-    # URL = getServerIP()+'/concent/data'
+def getTestFromServer():
     URL = getServerIP()+'/'
-    print(URL)
     headers = {'Content-Type': 'application/json; charset=utf-8', 'x-access-token':getTestToken()}
+    res = requests.get(URL, headers=headers)
+    print("*"*50)
+    if res.status_code == 200:
+        # 성공 시
+        print("GET 테스트 성공")
+        print("*"*50)
+    else:
+        print("GET 테스트 실패")
+        print("*"*50)
+
+def postDataBy1Min(data):
+    URL = getServerIP()+'/concent/data'
+    # URL = getServerIP()+'/'
+    print(URL)
+    headers = {'Content-Type': 'application/json;charset=utf-8', 'x-access-token':getTestToken()}
     # cookies = {'session_id': 'sorryidontcare'}
     # res = requests.post(URL, data, headers=headers, cookies=cookies)
-    res = requests.post(URL, data, headers=headers)
+    res = requests.post(URL, json=data, headers=headers)
     print("*"*50)
     if res.status_code == 200:
         # 성공 시
@@ -65,18 +79,22 @@ def postDataBy1Min(data):
 
 def isConcentOrPlay(data):
     '''
-    [OUTPUT]: 'C' or 'P'
+    [OUTPUT]: 'C' or 'P' or 'N'
     1. C인 경우
-        손, 책이 둘 다 검출되는 경우
-        손, 태블릿이 둘 다 검출되는 경우
-        손, 펜이 둘 다 검출되는 경우 
+        펜, 책, 태블릿이 검출되는 경우 (OR)
     2. P인 경우
-        핸드폰인 경우
-        C가 아닌 경우
+        핸드폰이 검출되는 경우
+        어떤 객체도 검출되지 않는 경우
+    3. N인 경우
+        위 1, 2번 케이스 어디에도 해당되지 않는 경우
     '''
-    isHandExist = False
+    # isHandExist = False
     isBookExist = False
     isPenExist = False
+
+    if len(data) == 0:
+        # 어떤 객체도 검출되지 않음
+        return 'P'
     
     for d in data:
         if d['name'] == 'handonly':
@@ -87,12 +105,10 @@ def isConcentOrPlay(data):
             isPenExist = True
         if d['name'] == 'phone':
             return 'P'
-
-    if isHandExist and isBookExist:
+    if isPenExist or isBookExist:
         return 'C'
-    elif isHandExist and isPenExist:
-        return 'C'
-    return 'P'
+    
+    return 'N'
         
     
 def main():
@@ -102,14 +118,17 @@ def main():
     1. 5초마다 캠으로 집중 여부 파악하기
         (1) DUMMY: 로그로 표시(객체 -> 객체 간 근접 여부 -> 집중 여부)
         (2) REAL: 집중 여부 LED로 표시
-    2. 60초마다 축적한 12개의 집중 여부 -> 서버로 전송
+    2. 60초마다 축적한 집중 여부 -> 서버로 전송
+        (1) P: 딴짓 판별된 결과, C: 집중으로 판별된 결과, N: 판별 못 내릴 때의 결과
+        (2) if N > P+C 일 경우, P로 판별
+            else일 경우, max(P, C)의 결과로 판별
     3. (확장) 전광판 사용하기
     '''
     player = cv2.VideoCapture(0)
     assert player.isOpened()
     # 0 means read from local camera
     current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
-    study_data = {"C": 0, "P":0}
+    study_data = {"C": 0, "P":0, "N":0}
 
     while True:
         prev_minute = current_time["minute"]
@@ -125,31 +144,38 @@ def main():
         # 분이 바뀔 때마다
         current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
         if (prev_minute != current_time["minute"]):
-            if study_data["C"] > study_data["P"]:
+            if study_data["N"] > (study_data["P"] + study_data["C"]) and study_data["P"]>2*study_data["C"]:
+                # 검출 객체들이 안 나오는 경우가 P, C보다 많은 경우 1분간 논 경우로 취급
+                body = {"status": "P"}
+            elif study_data["C"] > study_data["P"]:
                 # 1분간 집중한 경우로 취급
                 body = {"status": "C"}
             else:
                 # 1분간 논 경우로 취급
                 body = {"status": "P"}
-            print("===POST 성공===")
+            
             print("축적 데이터:", study_data)
             print("결과:", body)
-            # # 서버에 POST 요청
-            # if postDataBy1Min(body):
-            #     # 성공적으로 post 한 경우 클리어해 주기
-            #     study_data = {"C": 0, "P":0}
-            study_data = {"C": 0, "P":0}
+            # 서버에 POST 요청
+            if postDataBy1Min(body):
+                
+                print("===POST 성공===")
+                
+                # 공부여부에 따라 LED 색깔 변화
+                if body["status"] == 'P':
+                    makeRedLEDOn()
+                else:
+                    makeGreenLEDOn()
+
+                # 성공적으로 post 한 경우 클리어해 주기
+                study_data = {"C": 0, "P":0, "N":0}
+            # study_data = {"C": 0, "P":0}
             
         # results -> results_array(요소 각각이 딕셔너리인 배열)로 변환
         results_array = getResultArray(results)
-        # 공부 여부 판별 알고리즘 적용해 study_data에 C, P 개수 갱신 및 축적
+        # 공부 여부 판별 알고리즘 적용해 study_data에 C, P, N 개수 갱신 및 축적
         algorithmResult = isConcentOrPlay(results_array)
         study_data[algorithmResult] += 1
-        # 공부여부에 따라 LED 색깔 변화
-        if algorithmResult == 'C':
-            makeGreenLEDOn()
-        else:
-            makeRedLEDOn()
 
         # 로그 찍기
         print("===============================")
@@ -168,4 +194,5 @@ if __name__== "__main__":
     model = torch.hub.load('yolov5', 'custom', path='weights/best.pt', source='local', force_reload=True)
     
     main()
-    # postDataBy1Min({})
+    # getTestFromServer()
+    # postDataBy1Min({"status": "C"})
