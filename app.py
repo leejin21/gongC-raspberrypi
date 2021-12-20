@@ -94,7 +94,7 @@ def isConcentOrPlay(data):
 
     if len(data) == 0:
         # 어떤 객체도 검출되지 않음
-        return 'P'
+        return 'N'
     
     for d in data:
         if d['name'] == 'handonly':
