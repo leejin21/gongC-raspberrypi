@@ -144,7 +144,7 @@ def main():
         # 분이 바뀔 때마다
         current_time = {"hour": time.localtime().tm_hour, "minute": str(time.localtime().tm_min)}
         if (prev_minute != current_time["minute"] and sum(study_data.values())>6):
-            if study_data["N"] > (study_data["P"] + study_data["C"]) and study_data["P"]>2*study_data["C"]:
+            if study_data["N"] > (study_data["P"] + study_data["C"]) and study_data["P"]>study_data["C"]:
                 # 검출 객체들이 안 나오는 경우가 P, C보다 많은 경우 1분간 논 경우로 취급
                 body = {"status": "P"}
             elif study_data["C"] > study_data["P"]:
